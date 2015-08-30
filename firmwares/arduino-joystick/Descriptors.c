@@ -1,7 +1,7 @@
 /*
              LUFA Library
      Copyright (C) Dean Camera, 2010.
-              
+
   dean [at] fourwalledcubicle [dot] com
       www.fourwalledcubicle.com
 */
@@ -9,13 +9,13 @@
 /*
   Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  Permission to use, copy, modify, distribute, and sell this 
+  Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in 
+  without fee, provided that the above copyright notice appear in
   all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting 
-  documentation, and that the name of the author not be used in 
-  advertising or publicity pertaining to distribution of the 
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
   software without specific, written prior permission.
 
   The author disclaim all warranties with regard to this
@@ -30,9 +30,9 @@
 
 /** \file
  *
- *  USB Device Descriptors, for library use when in USB device mode. Descriptors are special 
+ *  USB Device Descriptors, for library use when in USB device mode. Descriptors are special
  *  computer-readable structures which the host requests upon device enumeration, to determine
- *  the device's capabilities and functions.  
+ *  the device's capabilities and functions.
  */
 
 #include "Descriptors.h"
@@ -47,25 +47,39 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 {
 	0x05, 0x01,          /* Usage Page (Generic Desktop)                       */
 	0x09, 0x04,          /* Usage (Joystick)                                   */
+
 	0xa1, 0x01,          /* Collection (Application)                           */
 	0x09, 0x01,          /*   Usage (Pointer)                                  */
+
+	/* 8 axes, signed 16 bit resolution, range 0 to 2000 (16 bytes) */
 	0xa1, 0x00,          /*   Collection (Physical)                            */
 	0x05, 0x01,          /*     Usage Page (Generic Desktop)                   */
-	0x09, 0x30,          /*     Usage (1)                                      */
-	0x09, 0x31,          /*     Usage (2)                                      */
-	0x09, 0x32,          /*     Usage (3)                                      */
-	0x09, 0x33,          /*     Usage (4)                                      */		
-	0x09, 0x34,          /*     Usage (5)                                      */	
-	0x09, 0x35,          /*     Usage (6)                                      */	
-	0x09, 0x36,          /*     Usage (7)                                      */
-	0x09, 0x37,          /*     Usage (8)                                      */		
-	
-	0x15, 0x00,          /*     Logical Minimum (0)           (15 one byte, 26 two bytes, 27 three bytes)       */
-	0x26, 0xD0, 0x07,         /*     Logical Maximum (2000)                          */
-	0x75, 0x10,          /*     Report Size (16)                                */
-	0x95, 0x08,          /*     Report Count (8)                               */
+	0x09, 0x30,          /*     Usage (X)                                      */
+	0x09, 0x31,          /*     Usage (Y)                                      */
+	0x09, 0x32,          /*     Usage (Analog1)                                */
+	0x09, 0x33,          /*     Usage (Analog2)                                */
+	0x09, 0x34,          /*     Usage (Analog3)                                */
+	0x09, 0x35,          /*     Usage (Analog4)                                */
+	0x09, 0x36,          /*     Usage (Analog5)                                */
+	0x09, 0x37,          /*     Usage (Analog6)                                */
+  0x09, 0x38,          /*     Usage (Analog6)                                */
+	0x15, 0x00,          /*     Logical Minimum (0)                       */
+	0x26, 0xD0, 0x07,    /*     Logical Maximum (2000)                        */
+	0x75, 16,            /*     Report Size (16)                               */
+	0x95, 9,             /*     Report Count (9)                               */
 	0x81, 0x82,          /*     Input (Data, Variable, Absolute, Volatile)     */
-	0xc0
+	0xc0,                /*   End Collection                                   */
+
+	/* 40 buttons, value 0=off, 1=on (5 bytes) */
+//	0x05, 0x09,          /*   Usage Page (Button)                              */
+//	0x19, 1,             /*     Usage Minimum (Button 1)                       */
+//	0x29, 40,            /*     Usage Maximum (Button 40)                      */
+//	0x15, 0x00,          /*   Logical Minimum (0)                              */
+//	0x25, 0x01,          /*   Logical Maximum (1)                              */
+//	0x75, 1,             /*   Report Size (1)                                  */
+//	0x95, 40,            /*   Report Count (40)                                */
+//	0x81, 0x02,          /*   Input (Data, Variable, Absolute)                 */
+	0xc0                 /* End Collection                                     */
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -76,22 +90,22 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
-		
+
 	.USBSpecification       = VERSION_BCD(01.10),
 	.Class                  = 0x00,
 	.SubClass               = 0x00,
 	.Protocol               = 0x00,
-	
+
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
-		
+
 	.VendorID               = 0x03EB,
 	.ProductID              = 0x2043,
 	.ReleaseNumber          = 0x0000,
-		
+
 	.ManufacturerStrIndex   = 0x01,
 	.ProductStrIndex        = 0x02,
 	.SerialNumStrIndex      = NO_DESCRIPTOR,
-		
+
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
@@ -102,41 +116,41 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
  */
 const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
-	.Config = 
+	.Config =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
 			.TotalInterfaces        = 1,
-				
+
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = NO_DESCRIPTOR,
-				
+
 			.ConfigAttributes       = (USB_CONFIG_ATTR_BUSPOWERED | USB_CONFIG_ATTR_SELFPOWERED),
-			
+
 			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
 		},
-		
-	.HID_Interface = 
+
+	.HID_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
 			.InterfaceNumber        = 0x00,
 			.AlternateSetting       = 0x00,
-			
+
 			.TotalEndpoints         = 1,
-				
+
 			.Class                  = 0x03,
 			.SubClass               = 0x00,
 			.Protocol               = HID_NON_BOOT_PROTOCOL,
-				
+
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
-	.HID_JoystickHID = 
+	.HID_JoystickHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_t), .Type = DTYPE_HID},
-			
+
 			.HIDSpec                = VERSION_BCD(01.11),
 			.CountryCode            = 0x00,
 			.TotalReportDescriptors = 1,
@@ -144,15 +158,15 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.HIDReportLength        = sizeof(JoystickReport)
 		},
 
-	.HID_ReportINEndpoint = 
+	.HID_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-			
+
 			.EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_IN | JOYSTICK_EPNUM),
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = JOYSTICK_EPSIZE,
 			.PollingIntervalMS      = 0x0A
-		}	
+		}
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -162,7 +176,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 const USB_Descriptor_String_t PROGMEM LanguageString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(1), .Type = DTYPE_String},
-		
+
 	.UnicodeString          = {LANGUAGE_ID_ENG}
 };
 
@@ -173,7 +187,7 @@ const USB_Descriptor_String_t PROGMEM LanguageString =
 const USB_Descriptor_String_t PROGMEM ManufacturerString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(7), .Type = DTYPE_String},
-		
+
 	.UnicodeString          = L"Arduino"
 };
 
@@ -183,9 +197,9 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString =
  */
 const USB_Descriptor_String_t PROGMEM ProductString =
 {
-	.Header                 = {.Size = USB_STRING_LEN(16), .Type = DTYPE_String},
-		
-	.UnicodeString          = L"Arduino Joystick"
+	.Header                 = {.Size = USB_STRING_LEN(20), .Type = DTYPE_String},
+
+	.UnicodeString          = L"Arduino PPM Joystick"
 };
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
@@ -210,38 +224,38 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 			Address = (void*)&DeviceDescriptor;
 			Size    = sizeof(USB_Descriptor_Device_t);
 			break;
-		case DTYPE_Configuration: 
+		case DTYPE_Configuration:
 			Address = (void*)&ConfigurationDescriptor;
 			Size    = sizeof(USB_Descriptor_Configuration_t);
 			break;
-		case DTYPE_String: 
+		case DTYPE_String:
 			switch (DescriptorNumber)
 			{
-				case 0x00: 
+				case 0x00:
 					Address = (void*)&LanguageString;
 					Size    = pgm_read_byte(&LanguageString.Header.Size);
 					break;
-				case 0x01: 
+				case 0x01:
 					Address = (void*)&ManufacturerString;
 					Size    = pgm_read_byte(&ManufacturerString.Header.Size);
 					break;
-				case 0x02: 
+				case 0x02:
 					Address = (void*)&ProductString;
 					Size    = pgm_read_byte(&ProductString.Header.Size);
 					break;
 			}
-			
+
 			break;
-		case DTYPE_HID: 
+		case DTYPE_HID:
 			Address = (void*)&ConfigurationDescriptor.HID_JoystickHID;
 			Size    = sizeof(USB_HID_Descriptor_t);
 			break;
-		case DTYPE_Report: 
+		case DTYPE_Report:
 			Address = (void*)&JoystickReport;
 			Size    = sizeof(JoystickReport);
 			break;
 	}
-	
+
 	*DescriptorAddress = Address;
 	return Size;
 }

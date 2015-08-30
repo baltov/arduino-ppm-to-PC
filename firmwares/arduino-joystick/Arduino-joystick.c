@@ -1,7 +1,7 @@
 /*
              LUFA Library
      Copyright (C) Dean Camera, 2010.
-              
+
   dean [at] fourwalledcubicle [dot] com
       www.fourwalledcubicle.com
 */
@@ -9,13 +9,13 @@
 /*
   Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  Permission to use, copy, modify, distribute, and sell this 
+  Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in 
+  without fee, provided that the above copyright notice appear in
   all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting 
-  documentation, and that the name of the author not be used in 
-  advertising or publicity pertaining to distribution of the 
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
   software without specific, written prior permission.
 
   The author disclaim all warranties with regard to this
@@ -89,7 +89,7 @@ USB_ClassInfo_HID_Device_t Joystick_HID_Interface = {
 /** Circular buffer to hold data from the serial port before it is sent to the host. */
 RingBuff_t USARTtoUSB_Buffer;
 
-USB_JoystickReport_Data_t joyReport = { {0, 0, 0, 0,0,0,0,0 }};
+USB_JoystickReport_Data_t joyReport = { {0, 0, 0, 0, 0, 0, 0, 0, 0}};//, {0, 0, 0, 0, 0} };
 
 #define LED_ON_TICKS 2000	/* Number of ticks to leave LEDs on */
 volatile int led1_ticks = 0;
@@ -186,14 +186,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(
 
     RingBuff_Count_t BufferCount = RingBuffer_GetCount(&USARTtoUSB_Buffer);
 
-    if (BufferCount >= (sizeof(joyReport) + 1)) {
+    /* If there's a new report from the Arduino, copy it in and send that.
+     * If not then the last report is sent again.
+     */
+    if (BufferCount >= sizeof(joyReport)) {
 	uint8_t ind;
 	for (ind=0; ind<sizeof(joyReport); ind++) {
 	    ((uint8_t *)&joyReport)[ind] = RingBuffer_Remove(&USARTtoUSB_Buffer);
 	}
-
-	/* Remove spacer */
-	RingBuffer_Remove(&USARTtoUSB_Buffer);
 
 	LEDs_TurnOnLEDs(LEDS_LED1);
 	led1_ticks = LED_ON_TICKS;
@@ -201,7 +201,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(
 
     *reportp = joyReport;
 
-    *ReportSize = sizeof(USB_JoystickReport_Data_t);
+    *ReportSize = sizeof(joyReport);
     return false;
 }
 

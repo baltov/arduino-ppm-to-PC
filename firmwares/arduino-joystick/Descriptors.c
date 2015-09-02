@@ -58,17 +58,15 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 	0x09, 0x31,          /*     Usage (Y)                                      */
 	0x09, 0x32,          /*     Usage (Analog1)                                */
 	0x09, 0x33,          /*     Usage (Analog2)                                */
-//	0x09, 0x34,          /*     Usage (Analog3)                                */
-//	0x09, 0x35,          /*     Usage (Analog4)                                */
-//	0x09, 0x36,          /*     Usage (Analog5)                                */
-//	0x09, 0x37,          /*     Usage (Analog6)                                */
-//  0x09, 0x38,          /*     Usage (Analog6)                                */
+	0x09, 0x34,          /*     Usage (Analog3)                                */
+	0x09, 0x35,          /*     Usage (Analog4)                                */
+	0x09, 0x36,          /*     Usage (Analog5)                                */
+	0x09, 0x37,          /*     Usage (Analog6)                                */
+        0x09, 0x38,          /*     Usage (Analog6)                                */
 	0x15, 0x00,          /*     Logical Minimum (0)                       */
 	0x26, 0xD0, 0x07,    /*     Logical Maximum (2000)                        */
-//	0x26, 0xDC, 0x05,    /*     Logical Maximum (1500)                        */
 	0x75, 16,            /*     Report Size (16)                               */
-//	0x95, 9,             /*     Report Count (9)                               */
-	0x95, 4,             /*     Report Count (9)                               */
+	0x95, 9,             /*     Report Count (9)                               */
 	0x81, 0x82,          /*     Input (Data, Variable, Absolute, Volatile)     */
 	0xc0,                /*   End Collection                                   */
 

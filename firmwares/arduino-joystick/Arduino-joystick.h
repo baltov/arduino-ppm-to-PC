@@ -56,7 +56,7 @@
  *  This mirrors the layout described to the host in the HID report descriptor, in Descriptors.c.
  */
 typedef struct {
-    int16_t axis[4]; /**< Current absolute position axis 1-8, signed 16-bit integer */
+    int16_t axis[9]; /**< Current absolute position axis 1-8, signed 16-bit integer */
     //uint8_t button[5];  /**< Bit mask of the currently pressed joystick buttons 1-40, 8 per byte */
 } USB_JoystickReport_Data_t;
 

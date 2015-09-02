@@ -1,16 +1,108 @@
+
+//#define USE_RC
+
+#ifdef USE_RC
+#include <RcTrainer.h>
+#else
 #include <Arduino.h>
 #include <util/atomic.h>
+#endif
 
-#define NUM_AXES  9        // 9 axes, X, Y, Z, etc
 
-#define PULSE_MIN   (750)       // minimum PWM pulse width which is considered valid
-#define PULSE_MAX   (2250)      // maximum PWM pulse width which is considered valid
+#define NUM_AXES  4        // 9 axes, X, Y, Z, etc
 
-typedef struct joyReport_t {
-  int16_t axis[NUM_AXES];
-} joyReport_t;
+#ifndef USE_RC
+//#define PULSE_MIN   (750)       // minimum PWM pulse width which is considered valid
+//#define PULSE_MAX   (2250)      // maximum PWM pulse width which is considered valid
 
-vo joyReport_t joyReport = {{0,0,0,0,0,0,0,0,0}};
+#define PULSE_MIN   (760)       // minimum PWM pulse width which is considered valid
+#define PULSE_MAX   (2280)      // maximum PWM pulse width which is considered valid
+
+#else
+ RcTrainer rc(1);
+#endif
+
+//#define DEBUG
+
+uint16_t data[NUM_AXES] = {0, 0, 0, 0};//, 0, 0, 0, 0, 0};
+
+
+#ifndef USE_RC
+static void interruptHandler()
+{
+  uint16_t diff;
+  static uint16_t now;
+  static uint16_t last = 0;
+  static uint8_t chan = 0;
+  #ifdef DEBUG
+  static uint16_t min = 64000;
+  static uint16_t max = 0;
+  #endif
+  
+
+  last = now;
+  now = micros();
+  diff = now - last;
+
+  if (diff > 3000 /*2700*/)  { // Per http://www.rcgroups.com/forums/showpost.php?p=21996147&postcount=3960 "So, if you use 2.5ms or higher as being the reset for the PPM stream start, you will be fine. I use 2.7ms just to be safe."
+    chan = 0;
+  }
+  else {
+    if (/*diff > PULSE_MIN && diff < PULSE_MAX && */chan < 4 /*NUM_AXES*/) {   // 750 to 2250 ms is our 'valid' channel range
+     #ifdef DEBUG
+    
+     char buffer[7];         //the ASCII of the integer will be stored in this char array
+     itoa(chan,buffer,10);
+     
+     char buffer2[7];
+     itoa(diff,buffer2,10);
+
+     char minbuff[7];
+     itoa(min,minbuff,10);
+     char maxbuff[7];
+     itoa(max,maxbuff,10);
+
+     
+     if (diff > max) max = diff;
+     if (diff < min) min = diff;
+     Serial.print(buffer); Serial.print(":"); Serial.print(buffer2);Serial.print(":");
+     Serial.print(minbuff);Serial.print(":");Serial.println(maxbuff);
+     #endif
+
+     
+     diff = map(diff, 1068, 1916, 0, 1500);
+     diff= constrain(diff, 0, 1500); 
+     data[chan] = diff;
+    }
+    chan++;
+  }
+}
+#endif
+
+uint16_t channels[NUM_AXES] = {0, 0, 0, 0};//, 0, 0, 0, 0, 0};
+
+void loop()
+{
+  #ifndef USE_RC
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    memcpy(channels, data, sizeof(data));
+  }
+  
+ #else
+
+ uint8_t i;
+ for (i=0;i<6;i++){
+  uint16_t val = rc.getChannel(i);
+  channels[i] = val;
+ }
+ #endif 
+ #ifndef DEBUG
+    Serial.write((uint8_t *)&channels, sizeof(channels));
+  #endif
+
+  delay(100);
+}
 
 void setup()
 {
@@ -18,52 +110,11 @@ void setup()
   // See http://arduino.cc/en/Reference/attachInterrupt for mapping
   // interrupt number to pin number
 
+#ifndef USE_RC
   attachInterrupt(1, interruptHandler, RISING);
+#endif
   Serial.begin(115200);
   delay(200);
-}
 
-
-static void interruptHandler()
-{
-  uint16_t diff;
-  static uint16_t now;
-  static uint16_t last = 0;
-  static uint8_t chan = 0;
-
-  last = now;
-  now = micros();
-  diff = now - last;
-
-  if (diff > 2700) { // Per http://www.rcgroups.com/forums/showpost.php?p=21996147&postcount=3960 "So, if you use 2.5ms or higher as being the reset for the PPM stream start, you will be fine. I use 2.7ms just to be safe."
-    chan = 0;
-  } 
-  else {
-    if (diff > PULSE_MIN && diff < PULSE_MAX && chan < NUM_AXES) {   // 750 to 2250 ms is our 'valid' channel range
-      joyReport.axis[chan] = diff;
-    }
-    chan++;
-  }
-}
-
-
-void loop()
-{
-  uint16_t channels[NUM_AXES] = {0,0,0,0,0,0,0,0,0};
-  uint8_t i;
-  for (i=0; i< NUM_AXES;i++) 
-  {
-    uint16_t chan;
-    ATOMIC_BLOCK(ATOMIC_FORCEON)
-    {
-      chan = joyReport.axis[i];
-    } // after this line interrupts are allways enabled!If you want state to be restored use ATOMIC_RESTORESTATE
-
-    uint16_t val = map(chan,PULSE_MIN,PULSE_MAX,0,2000);
-    val = constrain(val, 0,2000);
-    channels[i] = val;
-  }
-  Serial.write((uint8_t *)&channels, sizeof(channels));
-  delay(100);
 }
 
